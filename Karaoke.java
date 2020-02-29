@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -23,7 +24,7 @@ public class Karaoke {
 
     }
 
-    static void importMultipleSongs(String path){
+    static void importMultipleSongs(String path) {
         String filePath = System.getProperty("user.dir") + File.separator + path;
         try {
             InputStream inputStream = new FileInputStream(filePath);
@@ -35,9 +36,7 @@ public class Karaoke {
                 library.add(newSong);
             }
             Collections.sort(library);
-            for (Song song : library) {
-                System.out.println(song.getTitle());
-            };
+
         } catch (FileNotFoundException e) {
             System.out.println("FileNotFoundException");
         } catch (IOException e) {
@@ -45,24 +44,21 @@ public class Karaoke {
         }
     }
 
-    static void importOneSong(String name, String artist, int time, String link){
+    static void importOneSong(String name, String artist, int time, String link) {
         Song newSong = new Song(name, artist, time, link);
         library.add(newSong);
     }
 
-    static Song searchLibrary(String criteria){
-        if (binarySearch(criteria) != 0) {
+    static void searchLibrary(String criteria) {
 
-        } 
-        
     }
 
-    static void addToPlaylist(Song song){
+    static void addToPlaylist(Song song) {
         playlist.add(song);
     }
 
-    static void playSong(){
-        if (playlist.size() > 0){
+    static void playSong() {
+        if (playlist.size() > 0) {
             currentSong = playlist.remove();
             // play the song
         } else {
@@ -71,16 +67,26 @@ public class Karaoke {
         }
     }
 
-    static void viewPlaylist(){
-        for (Song song : playlist){
+    static void viewPlaylist() {
+        for (Song song : playlist) {
             System.out.println(song);
         }
         // refit to print to ui
     }
 
-    static void deleteFromPlaylist(int index){
-        playlist.remove(index);
+    static void deleteFromPlaylist(int index) {
+        playlist.remove();
     }
 
-    static void binarySearch(String input){};
+    static Song binarySearch(Song[] array, String value) {
+        int checkIndex = array.length / 2;
+
+        if (array[checkIndex].getTitle().compareTo(value) > 0) {
+            binarySearch(Arrays.copyOfRange(array, 0, checkIndex - 1), value);
+        } else if (array[checkIndex].getTitle().compareTo(value) < 0) {
+            binarySearch(Arrays.copyOfRange(array, checkIndex + 1, array.length - 1), value);
+        } else {
+            return (Song) array[checkIndex];
+        }
+    };
 }
