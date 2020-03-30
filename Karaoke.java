@@ -5,22 +5,43 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+
 import java.util.HashMap;
 
-public class Karaoke {
+public class Karaoke extends Application {
 
-    static ArrayList<Song> library = new ArrayList<>();
-    static Queue<Song> playlist = new LinkedList<>();
+    //static ArrayList<Song> library = new ArrayList<>();
+    static HashMap<String, Song> library = new HashMap<>();
+    /*
+    This is a good data structure as the task requires that the structure allow:
+    - Searching for a song
+    - Adding songs to the structure
+
+    Since a HashMap works off of key - value pairs, you can simply give the key (here the song title) and the Song object is returned with O(1) complexity
+    This same concept is applied to adding items to the structure
+    */
+    static LinkedList<Song> playlist = new LinkedList<>();
+    /*
+    This is a good data structure as the task requires that the structure allow:
+    - Adding songs to the structure
+    - Playing the first song in the structure (essentially accessing the first element and then deleting it from the structure)
+    - Viewing the playlist
+    - Deleting presumably any item from it (if it was just the first and viewing wasn't wanted, a Queue abstraction over the LinkedList would do)
+    */
     static Song currentSong;
 
     public static void main(String[] args) {
 
         importMultipleSongs(args[0]);
+        launch(args);
 
     }
 
@@ -33,9 +54,8 @@ public class Karaoke {
             while ((line = br.readLine()) != null) {
                 String[] array = line.split("\t");
                 Song newSong = new Song(array[0], array[1], Integer.parseInt(array[2]), array[3]);
-                library.add(newSong);
+                library.put(newSong.getTitle(), newSong);
             }
-            Collections.sort(library);
 
         } catch (FileNotFoundException e) {
             System.out.println("FileNotFoundException");
@@ -46,7 +66,7 @@ public class Karaoke {
 
     static void importOneSong(String name, String artist, int time, String link) {
         Song newSong = new Song(name, artist, time, link);
-        library.add(newSong);
+        library.put(newSong.getTitle(), newSong);
     }
 
     static void searchLibrary(String criteria) {
@@ -78,15 +98,49 @@ public class Karaoke {
         playlist.remove();
     }
 
-    static Song binarySearch(Song[] array, String value) {
-        int checkIndex = array.length / 2;
+    /*
+    GUI Required Features
+    - Title widget
+    - Video widget
+    - Video Control bar
+        - Play button
+        - Pause button
+        - Skip button
+    - Playlist Control bar
+        - Add song button
+        - View playlist button
+        - Delete song button
+        - Playlist contents output widget
+    - Library Control bar
+        - Add song button
+        - Search library button
+        - Search results widget
+    */
 
-        if (array[checkIndex].getTitle().compareTo(value) > 0) {
-            binarySearch(Arrays.copyOfRange(array, 0, checkIndex - 1), value);
-        } else if (array[checkIndex].getTitle().compareTo(value) < 0) {
-            binarySearch(Arrays.copyOfRange(array, checkIndex + 1, array.length - 1), value);
-        } else {
-            return (Song) array[checkIndex];
-        }
-    };
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle("Hello World!");
+        
+        GridPane root = new GridPane();
+        GridPane leftPane = new GridPane();
+        GridPane midPane = new GridPane();
+        GridPane rightPane = new GridPane();
+        GridPane addSongPane = new GridPane();
+        GridPane librarySearchPane = new GridPane();
+        GridPane songControlPane = new GridPane();
+        GridPane playlistControlPane = new GridPane();
+        
+        root.add(leftPane, 0, 0);
+        root.add(midPane, 1, 0);
+        root.add(rightPane, 2, 0);
+
+        leftPane.add(addSongPane, 0, 0);
+        leftPane.add(librarySearchPane, 0, 1);
+
+        midPane.add(songControlPane, 0, 2);
+
+        rightPane.add(playlistControlPane, 0, 0);
+        
+        primaryStage.setScene(new Scene(root, 300, 250));
+        primaryStage.show();
+    }
 }
