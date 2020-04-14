@@ -1,3 +1,4 @@
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import javafx.application.Application;
@@ -5,19 +6,9 @@ import static javafx.application.Application.launch;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
@@ -25,29 +16,23 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.scene.paint.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Queue;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import java.util.HashMap;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class ApplicationRunner extends Application {
 
@@ -78,7 +63,6 @@ public class ApplicationRunner extends Application {
          * Media media = new Media("test.mp4"); MediaPlayer player = new
          * MediaPlayer(media); player.setAutoPlay(true);
          */
-
         primaryStage.setTitle("Karaoke Machine");
         GridPane root = new GridPane();
         GridPane leftPane = new GridPane();
@@ -88,6 +72,20 @@ public class ApplicationRunner extends Application {
         GridPane librarySearchPane = new GridPane();
         GridPane songControlPane = new GridPane();
         GridPane playlistControlPane = new GridPane();
+
+        GridPane.setMargin(leftPane, new Insets(5));
+        GridPane.setMargin(midPane, new Insets(5));
+        GridPane.setMargin(rightPane, new Insets(5));
+        GridPane.setMargin(addSongPane, new Insets(5));
+        GridPane.setMargin(librarySearchPane, new Insets(5));
+        GridPane.setMargin(songControlPane, new Insets(5));
+        GridPane.setMargin(playlistControlPane, new Insets(5));
+
+        leftPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+        midPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+        rightPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+        addSongPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+        playlistControlPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
 
         root.add(leftPane, 0, 0);
         root.add(midPane, 1, 0);
@@ -115,10 +113,15 @@ public class ApplicationRunner extends Application {
         addSongPane.add(videoInput, 1, 4);
         addSongPane.add(addSongButton, 0, 5);
         addSongPane.setColumnSpan(addSongLabel, 2);
+        addSongPane.setColumnSpan(addSongButton, 2);
+        GridPane.setHalignment(addSongButton, HPos.CENTER);
 
         Button librarySearchButton = new Button("Search");
         TextField librarySearchInput = new TextField("Song name here");
-        TextArea librarySearchOutput = new TextArea("Search results");
+        Label librarySearchOutput = new Label("Search results");
+        librarySearchOutput.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+        librarySearchOutput.setPrefHeight(300);
+        librarySearchOutput.setPrefWidth(200);
 
         librarySearchPane.add(librarySearchInput, 0, 0);
         librarySearchPane.add(librarySearchButton, 1, 0);
@@ -127,12 +130,64 @@ public class ApplicationRunner extends Application {
 
         // Middle Pane
         Label titleLabel = new Label("Song Title");
+        titleLabel.setFont(Font.font("Deja Vu Sans", FontWeight.BOLD, 14));
+        
         TextField videoView = new TextField("Video should go here");
+        videoView.setPrefWidth(640);
+        videoView.setMaxWidth(640);
+        videoView.setPrefHeight(480);
+        videoView.setMaxHeight(480);
+
+        GridPane.setHalignment(titleLabel, HPos.CENTER);
 
         midPane.add(titleLabel, 0, 0);
         midPane.add(videoView, 0, 1);
 
-        primaryStage.setScene(new Scene(root, 750, 450));
+        Button play = new Button("Play");
+        Button pause = new Button("Pause");
+        Button skip = new Button("Skip");
+
+        songControlPane.add(play, 0, 0);
+        songControlPane.add(pause, 1, 0);
+        songControlPane.add(skip, 2, 0);
+
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(33);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(33);
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPercentWidth(33);
+        songControlPane.getColumnConstraints().addAll(col1, col2, col3);
+        GridPane.setHalignment(play, HPos.CENTER);
+        GridPane.setHalignment(pause, HPos.CENTER);
+        GridPane.setHalignment(skip, HPos.CENTER);
+
+        // Right Pane
+        Button playlistAddButton = new Button("Add Song");
+        TextField playlistAddInput = new TextField("Song Name");
+        Button playlistDeleteButton = new Button("Delete Song");
+        TextField playlistDeleteInput = new TextField("Song Name");
+        Button refresh = new Button("Refresh Playlist View");
+
+        playlistControlPane.add(playlistAddButton, 0, 0);
+        playlistControlPane.add(playlistAddInput, 1, 0);
+        playlistControlPane.add(playlistDeleteButton, 0, 1);
+        playlistControlPane.add(playlistDeleteInput, 1, 1);
+        playlistControlPane.add(refresh, 0, 2);
+        playlistControlPane.setColumnSpan(refresh, 2);
+        GridPane.setHalignment(refresh, HPos.CENTER);
+
+        Label playlistContents = new Label("Playlist contents");
+
+        playlistContents.setPrefWidth(300);
+        playlistContents.setMaxWidth(300);
+        playlistContents.setPrefHeight(300);
+        playlistContents.setMaxHeight(300);
+        playlistContents.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+
+        rightPane.add(playlistContents, 0, 1);
+
+        primaryStage.setScene(new Scene(root, 1200, 450));
         primaryStage.show();
     }
 
