@@ -40,7 +40,7 @@ public class ApplicationRunner extends Application {
     /*
      * This is a good data structure as the task requires that the structure allow:
      * - Searching for a song - Adding songs to the structure
-     * 
+     *
      * Since a HashMap works off of key - value pairs, you can simply give the key
      * (here the song title) and the Song object is returned with O(1) complexity
      * This same concept is applied to adding items to the structure
@@ -56,6 +56,42 @@ public class ApplicationRunner extends Application {
      */
     static Song currentSong;
 
+    static GridPane root = new GridPane();
+    static GridPane leftPane = new GridPane();
+    static GridPane midPane = new GridPane();
+    static GridPane rightPane = new GridPane();
+    static GridPane addSongPane = new GridPane();
+    static GridPane librarySearchPane = new GridPane();
+    static GridPane songControlPane = new GridPane();
+    static GridPane playlistControlPane = new GridPane();
+
+    static Label addSongLabel = new Label("Add New Song");
+    static TextField titleInput = new TextField("Song Title");
+    static TextField artistInput = new TextField("Artist");
+    static TextField runningTimeInput = new TextField("Running Time");
+    static TextField videoInput = new TextField("Video Link");
+    static Button addSongButton = new Button("Add Song");
+
+    static Button librarySearchButton = new Button("Search");
+    static TextField librarySearchInput = new TextField("Song name here");
+    static Label librarySearchOutput = new Label("Search results");
+
+    static Label titleLabel = new Label("Song Title");
+
+    static TextField videoView = new TextField("Video should go here");
+
+    static Button play = new Button("Play");
+    static Button pause = new Button("Pause");
+    static Button skip = new Button("Skip");
+
+    static Button playlistAddButton = new Button("Add Song");
+    static TextField playlistAddInput = new TextField("Song Name");
+    static Button playlistDeleteButton = new Button("Delete Song");
+    static TextField playlistDeleteInput = new TextField("Song Name");
+    static Button refresh = new Button("Refresh Playlist View");
+
+    static Label playlistContents = new Label("Playlist contents");
+
     @Override
     public void start(Stage primaryStage) {
 
@@ -64,14 +100,6 @@ public class ApplicationRunner extends Application {
          * MediaPlayer(media); player.setAutoPlay(true);
          */
         primaryStage.setTitle("Karaoke Machine");
-        GridPane root = new GridPane();
-        GridPane leftPane = new GridPane();
-        GridPane midPane = new GridPane();
-        GridPane rightPane = new GridPane();
-        GridPane addSongPane = new GridPane();
-        GridPane librarySearchPane = new GridPane();
-        GridPane songControlPane = new GridPane();
-        GridPane playlistControlPane = new GridPane();
 
         GridPane.setMargin(leftPane, new Insets(5));
         GridPane.setMargin(midPane, new Insets(5));
@@ -99,13 +127,6 @@ public class ApplicationRunner extends Application {
         rightPane.add(playlistControlPane, 0, 0);
 
         // Left Pane
-        Label addSongLabel = new Label("Add New Song");
-        TextField titleInput = new TextField("Song Title");
-        TextField artistInput = new TextField("Artist");
-        TextField runningTimeInput = new TextField("Running Time");
-        TextField videoInput = new TextField("Video Link");
-        Button addSongButton = new Button("Add Song");
-
         addSongPane.add(addSongLabel, 1, 0);
         addSongPane.add(titleInput, 1, 1);
         addSongPane.add(artistInput, 1, 2);
@@ -116,9 +137,6 @@ public class ApplicationRunner extends Application {
         addSongPane.setColumnSpan(addSongButton, 2);
         GridPane.setHalignment(addSongButton, HPos.CENTER);
 
-        Button librarySearchButton = new Button("Search");
-        TextField librarySearchInput = new TextField("Song name here");
-        Label librarySearchOutput = new Label("Search results");
         librarySearchOutput.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
         librarySearchOutput.setPrefHeight(300);
         librarySearchOutput.setPrefWidth(200);
@@ -129,10 +147,8 @@ public class ApplicationRunner extends Application {
         librarySearchPane.setColumnSpan(librarySearchOutput, 2);
 
         // Middle Pane
-        Label titleLabel = new Label("Song Title");
         titleLabel.setFont(Font.font("Deja Vu Sans", FontWeight.BOLD, 14));
-        
-        TextField videoView = new TextField("Video should go here");
+
         videoView.setPrefWidth(640);
         videoView.setMaxWidth(640);
         videoView.setPrefHeight(480);
@@ -142,10 +158,6 @@ public class ApplicationRunner extends Application {
 
         midPane.add(titleLabel, 0, 0);
         midPane.add(videoView, 0, 1);
-
-        Button play = new Button("Play");
-        Button pause = new Button("Pause");
-        Button skip = new Button("Skip");
 
         songControlPane.add(play, 0, 0);
         songControlPane.add(pause, 1, 0);
@@ -163,12 +175,6 @@ public class ApplicationRunner extends Application {
         GridPane.setHalignment(skip, HPos.CENTER);
 
         // Right Pane
-        Button playlistAddButton = new Button("Add Song");
-        TextField playlistAddInput = new TextField("Song Name");
-        Button playlistDeleteButton = new Button("Delete Song");
-        TextField playlistDeleteInput = new TextField("Song Name");
-        Button refresh = new Button("Refresh Playlist View");
-
         playlistControlPane.add(playlistAddButton, 0, 0);
         playlistControlPane.add(playlistAddInput, 1, 0);
         playlistControlPane.add(playlistDeleteButton, 0, 1);
@@ -176,8 +182,6 @@ public class ApplicationRunner extends Application {
         playlistControlPane.add(refresh, 0, 2);
         playlistControlPane.setColumnSpan(refresh, 2);
         GridPane.setHalignment(refresh, HPos.CENTER);
-
-        Label playlistContents = new Label("Playlist contents");
 
         playlistContents.setPrefWidth(300);
         playlistContents.setMaxWidth(300);
@@ -216,38 +220,79 @@ public class ApplicationRunner extends Application {
         }
     }
 
-    static void importOneSong(String name, String artist, int time, String link) {
+    static void addSong(String name, String artist, int time, String link) {
         Song newSong = new Song(name, artist, time, link);
         library.put(newSong.getTitle(), newSong);
     }
 
-    static void searchLibrary(String criteria) {
-
+    static Song searchLibrary(String criteria) {
+        String output = library.get(criteria).getTitle();
+        librarySearchOutput.setText(output);
+        return library.get(criteria);
     }
-
-    static void addToPlaylist(Song song) {
-        playlist.add(song);
-    }
-
+    
     static void playSong() {
         if (playlist.size() > 0) {
-            // currentSong = playlist.remove();
-            // play the song
+            if (currentSong == null) {
+                currentSong = playlist.pollFirst();
+                titleLabel.setText(currentSong.getTitle());
+                // create a new video with the filename from currentSong
+                // update videoView with the new video
+                // make it play
+            } else {
+                // make the video play
+            }
         } else {
             System.out.println("Playlist is empty");
-            // show this on screen
         }
     }
+
+    static void addToPlaylist(String songName) {
+        Song theSong = library.get(songName);
+        playlist.add(theSong);
+    }
+
+    
 
     static void viewPlaylist() {
+        String outputString = "";
         for (Song song : playlist) {
-            System.out.println(song);
+            outputString = outputString + song.getTitle() + " - " + song.getArtist() + "\n";
         }
-        // refit to print to ui
+        playlistContents.setText(outputString);
     }
 
-    static void deleteFromPlaylist(int index) {
-        playlist.remove();
+    static void deleteFromPlaylist(String songName) {
+        int oldLength = playlist.size();
+        for (int i = 0; i < oldLength; i++) {
+            if (playlist.get(i).getTitle().equals(songName)) {
+                playlist.remove(i);
+            } else {
+                // Skip over it
+            }
+        }
+        int newLength = playlist.size();
+        if (newLength < oldLength) {
+            System.out.println("Song removed");
+        } else if (newLength > oldLength) {
+            System.out.println("Error");
+        } else {
+            System.out.println("No change");
+        }
+        
+        viewPlaylist();
     }
-
+    
+    static void pauseSong() {
+        // videoView.pause()
+    }
+    
+    static void skipSong() {
+        currentSong = playlist.pollFirst();
+        titleLabel.setText(currentSong.getTitle());
+        // create new video from currentSong.getFileName();
+        // insert it into videoView
+        // make it play if thats not automatically done
+    }
+  
 }
