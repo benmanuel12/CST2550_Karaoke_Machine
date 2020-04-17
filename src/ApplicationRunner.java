@@ -136,6 +136,9 @@ public class ApplicationRunner extends Application {
         addSongPane.setColumnSpan(addSongLabel, 2);
         addSongPane.setColumnSpan(addSongButton, 2);
         GridPane.setHalignment(addSongButton, HPos.CENTER);
+        addSongButton.setOnAction((ActionEvent e) -> {
+            addSong(titleInput.getText(), artistInput.getText(), Integer.parseInt(runningTimeInput.getText()), videoInput.getText());
+        });
 
         librarySearchOutput.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
         librarySearchOutput.setPrefHeight(300);
@@ -145,6 +148,11 @@ public class ApplicationRunner extends Application {
         librarySearchPane.add(librarySearchButton, 1, 0);
         librarySearchPane.add(librarySearchOutput, 0, 1);
         librarySearchPane.setColumnSpan(librarySearchOutput, 2);
+        
+        librarySearchButton.setOnAction((ActionEvent e) -> {
+            searchLibrary(librarySearchInput.getText());
+        });
+
 
         // Middle Pane
         titleLabel.setFont(Font.font("Deja Vu Sans", FontWeight.BOLD, 14));
@@ -162,14 +170,26 @@ public class ApplicationRunner extends Application {
         songControlPane.add(play, 0, 0);
         songControlPane.add(pause, 1, 0);
         songControlPane.add(skip, 2, 0);
-
+        
+        play.setOnAction((ActionEvent e) -> {
+            playSong();
+        });
+        pause.setOnAction((ActionEvent e) -> {
+            pauseSong();
+        });
+        skip.setOnAction((ActionEvent e) -> {
+            skipSong();
+        });
+        
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setPercentWidth(33);
         ColumnConstraints col2 = new ColumnConstraints();
         col2.setPercentWidth(33);
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setPercentWidth(33);
+        
         songControlPane.getColumnConstraints().addAll(col1, col2, col3);
+        
         GridPane.setHalignment(play, HPos.CENTER);
         GridPane.setHalignment(pause, HPos.CENTER);
         GridPane.setHalignment(skip, HPos.CENTER);
@@ -180,8 +200,18 @@ public class ApplicationRunner extends Application {
         playlistControlPane.add(playlistDeleteButton, 0, 1);
         playlistControlPane.add(playlistDeleteInput, 1, 1);
         playlistControlPane.add(refresh, 0, 2);
-        playlistControlPane.setColumnSpan(refresh, 2);
+        GridPane.setColumnSpan(refresh, 2);
         GridPane.setHalignment(refresh, HPos.CENTER);
+        
+        playlistAddButton.setOnAction((ActionEvent e) -> {
+            addToPlaylist(playlistAddInput.getText());
+        });
+        playlistDeleteButton.setOnAction((ActionEvent e) -> {
+            deleteFromPlaylist(Integer.parseInt(playlistDeleteInput.getText()));
+        });
+        refresh.setOnAction((ActionEvent e) -> {
+            viewPlaylist();
+        });
 
         playlistContents.setPrefWidth(300);
         playlistContents.setMaxWidth(300);
@@ -211,7 +241,7 @@ public class ApplicationRunner extends Application {
                 Song newSong = new Song(array[0], array[1], Integer.parseInt(array[2]), array[3]);
                 library.put(newSong.getTitle(), newSong);
             }
-            // System.out.println(library);
+            System.out.println("library imported");
 
         } catch (FileNotFoundException e) {
             System.out.println("FileNotFoundException");
@@ -230,7 +260,7 @@ public class ApplicationRunner extends Application {
         librarySearchOutput.setText(output);
         return library.get(criteria);
     }
-    
+
     static void playSong() {
         if (playlist.size() > 0) {
             if (currentSong == null) {
@@ -250,26 +280,25 @@ public class ApplicationRunner extends Application {
     static void addToPlaylist(String songName) {
         Song theSong = library.get(songName);
         playlist.add(theSong);
+        viewPlaylist();
     }
-
-    
 
     static void viewPlaylist() {
         String outputString = "";
+        int i = 1;
         for (Song song : playlist) {
-            outputString = outputString + song.getTitle() + " - " + song.getArtist() + "\n";
+            outputString = outputString + i + " - "+ song.getTitle() + " - " + song.getArtist() + "\n";
+            i++;
         }
         playlistContents.setText(outputString);
     }
 
-    static void deleteFromPlaylist(String songName) {
+    static void deleteFromPlaylist(int index) {
         int oldLength = playlist.size();
-        for (int i = 0; i < oldLength; i++) {
-            if (playlist.get(i).getTitle().equals(songName)) {
-                playlist.remove(i);
-            } else {
-                // Skip over it
-            }
+        try {
+            playlist.remove(index - 1);
+        } catch (IndexOutOfBoundsException ex) {
+            System.out.println("No song exists at that index");
         }
         int newLength = playlist.size();
         if (newLength < oldLength) {
@@ -279,14 +308,14 @@ public class ApplicationRunner extends Application {
         } else {
             System.out.println("No change");
         }
-        
+
         viewPlaylist();
     }
-    
+
     static void pauseSong() {
         // videoView.pause()
     }
-    
+
     static void skipSong() {
         currentSong = playlist.pollFirst();
         titleLabel.setText(currentSong.getTitle());
@@ -294,5 +323,5 @@ public class ApplicationRunner extends Application {
         // insert it into videoView
         // make it play if thats not automatically done
     }
-  
+
 }
