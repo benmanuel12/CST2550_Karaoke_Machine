@@ -141,18 +141,17 @@ public class ApplicationRunner extends Application {
         });
 
         librarySearchOutput.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
-        librarySearchOutput.setPrefHeight(300);
-        librarySearchOutput.setPrefWidth(200);
+        librarySearchOutput.setPrefHeight(200);
+        librarySearchOutput.setPrefWidth(300);
 
         librarySearchPane.add(librarySearchInput, 0, 0);
         librarySearchPane.add(librarySearchButton, 1, 0);
         librarySearchPane.add(librarySearchOutput, 0, 1);
         librarySearchPane.setColumnSpan(librarySearchOutput, 2);
-        
+
         librarySearchButton.setOnAction((ActionEvent e) -> {
             searchLibrary(librarySearchInput.getText());
         });
-
 
         // Middle Pane
         titleLabel.setFont(Font.font("Deja Vu Sans", FontWeight.BOLD, 14));
@@ -170,7 +169,7 @@ public class ApplicationRunner extends Application {
         songControlPane.add(play, 0, 0);
         songControlPane.add(pause, 1, 0);
         songControlPane.add(skip, 2, 0);
-        
+
         play.setOnAction((ActionEvent e) -> {
             playSong();
         });
@@ -180,16 +179,16 @@ public class ApplicationRunner extends Application {
         skip.setOnAction((ActionEvent e) -> {
             skipSong();
         });
-        
+
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setPercentWidth(33);
         ColumnConstraints col2 = new ColumnConstraints();
         col2.setPercentWidth(33);
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setPercentWidth(33);
-        
+
         songControlPane.getColumnConstraints().addAll(col1, col2, col3);
-        
+
         GridPane.setHalignment(play, HPos.CENTER);
         GridPane.setHalignment(pause, HPos.CENTER);
         GridPane.setHalignment(skip, HPos.CENTER);
@@ -202,7 +201,7 @@ public class ApplicationRunner extends Application {
         playlistControlPane.add(refresh, 0, 2);
         GridPane.setColumnSpan(refresh, 2);
         GridPane.setHalignment(refresh, HPos.CENTER);
-        
+
         playlistAddButton.setOnAction((ActionEvent e) -> {
             addToPlaylist(playlistAddInput.getText());
         });
@@ -221,7 +220,7 @@ public class ApplicationRunner extends Application {
 
         rightPane.add(playlistContents, 0, 1);
 
-        primaryStage.setScene(new Scene(root, 1200, 450));
+        primaryStage.setScene(new Scene(root, 1300, 500));
         primaryStage.show();
     }
 
@@ -256,9 +255,15 @@ public class ApplicationRunner extends Application {
     }
 
     static Song searchLibrary(String criteria) {
-        String output = library.get(criteria).getTitle();
-        librarySearchOutput.setText(output);
-        return library.get(criteria);
+        if (library.get(criteria) != null) {
+            String output = library.get(criteria).toString();
+            librarySearchOutput.setText(output);
+            return library.get(criteria);
+        } else {
+            librarySearchOutput.setText("No song with that name found");
+            return library.get(criteria);
+        }
+
     }
 
     static void playSong() {
@@ -287,7 +292,7 @@ public class ApplicationRunner extends Application {
         String outputString = "";
         int i = 1;
         for (Song song : playlist) {
-            outputString = outputString + i + " - "+ song.getTitle() + " - " + song.getArtist() + "\n";
+            outputString = outputString + i + " - " + song.getTitle() + " - " + song.getArtist() + "\n";
             i++;
         }
         playlistContents.setText(outputString);
