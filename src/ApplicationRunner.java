@@ -94,11 +94,7 @@ public class ApplicationRunner extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
-        /*
-         * Media media = new Media("test.mp4"); MediaPlayer player = new
-         * MediaPlayer(media); player.setAutoPlay(true);
-         */
+        
         primaryStage.setTitle("Karaoke Machine");
 
         GridPane.setMargin(leftPane, new Insets(5));
