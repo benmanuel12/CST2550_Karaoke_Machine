@@ -30,6 +30,10 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -54,7 +58,14 @@ public class ApplicationRunner extends Application {
      * it was just the first and viewing wasn't wanted, a Queue abstraction over the
      * LinkedList would do)
      */
+
+    static File defaultfile = new File("test.mp4");
+    static String defaultsource = defaultfile.toURI().toString();
+    static Media defaultvideo = new Media(defaultsource);
+    static MediaPlayer defaultplayer = new MediaPlayer(defaultvideo);
+
     static Song currentSong;
+    static MediaPlayer currentPlayer;
 
     static GridPane root = new GridPane();
     static GridPane leftPane = new GridPane();
@@ -77,8 +88,7 @@ public class ApplicationRunner extends Application {
     static Label librarySearchOutput = new Label("Search results");
 
     static Label titleLabel = new Label("Song Title");
-
-    static TextField videoView = new TextField("Video should go here");
+    static MediaView videoView = new MediaView(defaultplayer);
 
     static Button play = new Button("Play");
     static Button pause = new Button("Pause");
@@ -94,7 +104,7 @@ public class ApplicationRunner extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        
+
         primaryStage.setTitle("Karaoke Machine");
 
         GridPane.setMargin(leftPane, new Insets(5));
@@ -151,11 +161,7 @@ public class ApplicationRunner extends Application {
 
         // Middle Pane
         titleLabel.setFont(Font.font("Deja Vu Sans", FontWeight.BOLD, 14));
-
-        videoView.setPrefWidth(640);
-        videoView.setMaxWidth(640);
-        videoView.setPrefHeight(480);
-        videoView.setMaxHeight(480);
+        videoView.setVisible(false);
 
         GridPane.setHalignment(titleLabel, HPos.CENTER);
 
@@ -262,22 +268,6 @@ public class ApplicationRunner extends Application {
 
     }
 
-    static void playSong() {
-        if (playlist.size() > 0) {
-            if (currentSong == null) {
-                currentSong = playlist.pollFirst();
-                titleLabel.setText(currentSong.getTitle());
-                // create a new video with the filename from currentSong
-                // update videoView with the new video
-                // make it play
-            } else {
-                // make the video play
-            }
-        } else {
-            System.out.println("Playlist is empty");
-        }
-    }
-
     static void addToPlaylist(String songName) {
         Song theSong = library.get(songName);
         playlist.add(theSong);
@@ -290,6 +280,9 @@ public class ApplicationRunner extends Application {
         for (Song song : playlist) {
             outputString = outputString + i + " - " + song.getTitle() + " - " + song.getArtist() + "\n";
             i++;
+        }
+        if (outputString.length() == 0) {
+            outputString += "No songs in playlist";
         }
         playlistContents.setText(outputString);
     }
@@ -313,16 +306,60 @@ public class ApplicationRunner extends Application {
         viewPlaylist();
     }
 
+    static void playSong() {
+        if (currentSong == null) {
+            // no song playing
+            skipSong();
+        } else {
+            // a song is loaded
+            if (currentPlayer.getStatus() == Status.valueOf("PAUSED")) {
+                currentPlayer.play();
+            } else {
+                System.out.println("Video is already playing");
+            }
+        }
+    }
+
     static void pauseSong() {
-        // videoView.pause()
+        if (currentPlayer != null) {
+            if (currentPlayer.getStatus() == Status.valueOf("PLAYING")) {
+                currentPlayer.pause();
+            } else {
+                System.out.println("Video was not playing");
+            }
+        } else {
+            System.out.println("No video found");
+        }
+
     }
 
     static void skipSong() {
-        currentSong = playlist.pollFirst();
-        titleLabel.setText(currentSong.getTitle());
-        // create new video from currentSong.getFileName();
-        // insert it into videoView
-        // make it play if thats not automatically done
+        if (playlist.size() > 0) {
+            currentSong = playlist.pollFirst();
+            viewPlaylist();
+            if (currentPlayer != null) {
+                currentPlayer.stop();
+            }
+            if (videoView.isVisible() == false) {
+                videoView.setVisible(true);
+            }
+            System.out.println("Playing " + currentSong.getFileName());
+            currentPlayer = convertCurrentSongtoMediaPlayer();
+            titleLabel.setText(currentSong.getTitle());
+            videoView.setMediaPlayer(currentPlayer);
+            currentPlayer.play();
+        } else {
+            System.out.println("Playlist is empty, cant find next song");
+        }
+    }
+
+    static MediaPlayer convertCurrentSongtoMediaPlayer() {
+        File file = new File(currentSong.getFileName());
+        String source = file.toURI().toString();
+        Media video = new Media(source);
+        MediaPlayer player = new MediaPlayer(video);
+        player.setOnEndOfMedia(() -> skipSong());
+        return player;
     }
 
 }

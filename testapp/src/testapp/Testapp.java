@@ -3,11 +3,9 @@ package testapp;
 import java.io.File;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -16,19 +14,7 @@ import javafx.stage.Stage;
 public class Testapp extends Application {
 
     static MediaPlayer currentPlayer;
-
-    /*
-    static File file = new File("test.mp4");
-    static String source = file.toURI().toString();
-    static Media video = new Media(source);
-
-    static File file2 = new File("test2.mp4");
-    static String source2 = file2.toURI().toString();
-    static Media video2 = new Media(source2);
-     */
-    // 1 Media to many MediaPlayer
-    // 1 MediaPlayer to many MediaView
-    // A MediaPlayer without a MediaView or vice versa shows no video
+    
     @Override
     public void start(Stage primaryStage) {
 
@@ -72,8 +58,8 @@ public class Testapp extends Application {
                     MediaPlayer player = new MediaPlayer(video);
                     currentPlayer.stop();
                     System.out.println("Playing test2.mp4");
-                    mediaView.setMediaPlayer(player);
                     currentPlayer = player;
+                    mediaView.setMediaPlayer(currentPlayer);
                     currentPlayer.play();
                 }
         );
@@ -92,5 +78,4 @@ public class Testapp extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }
