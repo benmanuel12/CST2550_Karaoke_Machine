@@ -28,6 +28,7 @@ import javafx.scene.control.TextArea;
 import java.util.HashMap;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.media.Media;
@@ -76,6 +77,8 @@ public class ApplicationRunner extends Application {
     static GridPane songControlPane = new GridPane();
     static GridPane playlistControlPane = new GridPane();
 
+    static Label status = new Label();
+
     static Label addSongLabel = new Label("Add New Song");
     static TextField titleInput = new TextField("Song Title");
     static TextField artistInput = new TextField("Artist");
@@ -97,7 +100,7 @@ public class ApplicationRunner extends Application {
     static Button playlistAddButton = new Button("Add Song");
     static TextField playlistAddInput = new TextField("Song Name");
     static Button playlistDeleteButton = new Button("Delete Song");
-    static TextField playlistDeleteInput = new TextField("Song Name");
+    static TextField playlistDeleteInput = new TextField("Song Number");
     static Button refresh = new Button("Refresh Playlist View");
 
     static Label playlistContents = new Label("Playlist contents");
@@ -120,10 +123,14 @@ public class ApplicationRunner extends Application {
         rightPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
         addSongPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
         playlistControlPane.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
+        status.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
 
         root.add(leftPane, 0, 0);
         root.add(midPane, 1, 0);
         root.add(rightPane, 2, 0);
+        root.add(status, 0, 1);
+        GridPane.setColumnSpan(status, 3);
+        status.setAlignment(Pos.CENTER);
 
         leftPane.add(addSongPane, 0, 0);
         leftPane.add(librarySearchPane, 0, 1);
@@ -143,7 +150,7 @@ public class ApplicationRunner extends Application {
         addSongPane.setColumnSpan(addSongButton, 2);
         GridPane.setHalignment(addSongButton, HPos.CENTER);
         addSongButton.setOnAction((ActionEvent e) -> {
-            addSong(titleInput.getText(), artistInput.getText(), Integer.parseInt(runningTimeInput.getText()), videoInput.getText());
+            addSong(titleInput.getText(), artistInput.getText(), runningTimeInput.getText(), videoInput.getText());
         });
 
         librarySearchOutput.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
@@ -208,7 +215,7 @@ public class ApplicationRunner extends Application {
             addToPlaylist(playlistAddInput.getText());
         });
         playlistDeleteButton.setOnAction((ActionEvent e) -> {
-            deleteFromPlaylist(Integer.parseInt(playlistDeleteInput.getText()));
+            deleteFromPlaylist(playlistDeleteInput.getText());
         });
         refresh.setOnAction((ActionEvent e) -> {
             viewPlaylist();
@@ -227,8 +234,17 @@ public class ApplicationRunner extends Application {
     }
 
     public static void main(String[] args) {
-        importMultipleSongs(args[0]);
-        launch(args);
+        if (args.length == 1) {
+            importMultipleSongs(args[0]);
+            launch(args);
+        } else if (args.length > 1) {
+            System.out.println("Too many arguments supplied, one required");
+            System.exit(1);
+        } else {
+            System.out.println("No file argument supplied");
+            System.exit(1);
+        }
+
     }
 
     static void importMultipleSongs(String path) {
@@ -251,9 +267,16 @@ public class ApplicationRunner extends Application {
         }
     }
 
-    static void addSong(String name, String artist, int time, String link) {
-        Song newSong = new Song(name, artist, time, link);
-        library.put(newSong.getTitle(), newSong);
+    static void addSong(String name, String artist, String time, String link) {
+        try {
+            int newtime = Integer.parseInt(time);
+            Song newSong = new Song(name, artist, newtime, link);
+            library.put(newSong.getTitle(), newSong);
+            status.setText("Song added");
+        } catch (NumberFormatException ex) {
+            status.setText("Song runtime is not a number, try again");
+        }
+
     }
 
     static Song searchLibrary(String criteria) {
@@ -270,8 +293,13 @@ public class ApplicationRunner extends Application {
 
     static void addToPlaylist(String songName) {
         Song theSong = library.get(songName);
-        playlist.add(theSong);
-        viewPlaylist();
+        if (theSong != null) {
+            playlist.add(theSong);
+            viewPlaylist();
+        } else {
+            status.setText("No song found");
+        }
+
     }
 
     static void viewPlaylist() {
@@ -287,12 +315,15 @@ public class ApplicationRunner extends Application {
         playlistContents.setText(outputString);
     }
 
-    static void deleteFromPlaylist(int index) {
+    static void deleteFromPlaylist(String index) {
         int oldLength = playlist.size();
         try {
-            playlist.remove(index - 1);
+            int newIndex = Integer.parseInt(index);
+            playlist.remove(newIndex - 1);
         } catch (IndexOutOfBoundsException ex) {
-            System.out.println("No song exists at that index");
+            status.setText("No song exists at that index");
+        } catch (NumberFormatException ex) {
+            status.setText("Non-numerical value supplied");
         }
         int newLength = playlist.size();
         if (newLength < oldLength) {
@@ -354,12 +385,17 @@ public class ApplicationRunner extends Application {
     }
 
     static MediaPlayer convertCurrentSongtoMediaPlayer() {
-        File file = new File(currentSong.getFileName());
-        String source = file.toURI().toString();
-        Media video = new Media(source);
-        MediaPlayer player = new MediaPlayer(video);
-        player.setOnEndOfMedia(() -> skipSong());
-        return player;
+        if (currentSong == null) {
+            status.setText("There is no available song to play");
+            System.out.println("There is no available song to play");
+        } else {
+            File file = new File(currentSong.getFileName());
+            String source = file.toURI().toString();
+            Media video = new Media(source);
+            MediaPlayer player = new MediaPlayer(video);
+            player.setOnEndOfMedia(() -> skipSong());
+            return player;
+        }
     }
 
 }
