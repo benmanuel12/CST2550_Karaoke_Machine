@@ -3,9 +3,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
-import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -24,13 +22,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
 import java.util.HashMap;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
@@ -40,34 +35,24 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class ApplicationRunner extends Application {
-
+    
+    // Core data Structures
     static HashMap<String, Song> library = new HashMap<>();
-    /*
-     * This is a good data structure as the task requires that the structure allow:
-     * - Searching for a song - Adding songs to the structure
-     *
-     * Since a HashMap works off of key - value pairs, you can simply give the key
-     * (here the song title) and the Song object is returned with O(1) complexity
-     * This same concept is applied to adding items to the structure
-     */
     static LinkedList<Song> playlist = new LinkedList<>();
-    /*
-     * This is a good data structure as the task requires that the structure allow:
-     * - Adding songs to the structure - Playing the first song in the structure
-     * (essentially accessing the first element and then deleting it from the
-     * structure) - Viewing the playlist - Deleting presumably any item from it (if
-     * it was just the first and viewing wasn't wanted, a Queue abstraction over the
-     * LinkedList would do)
-     */
-
+    
+    // This code is only needed because I can't make a MediaView for showing the
+    // video without a MediaPlayer and that player needs a Media to be constructed
+    // and that needs a source from a File
     static File defaultfile = new File("test.mp4");
     static String defaultsource = defaultfile.toURI().toString();
     static Media defaultvideo = new Media(defaultsource);
     static MediaPlayer defaultplayer = new MediaPlayer(defaultvideo);
-
+    
+    // Core global variables
     static Song currentSong;
     static MediaPlayer currentPlayer;
-
+    
+    // Core GUI GridPanes
     static GridPane root = new GridPane();
     static GridPane leftPane = new GridPane();
     static GridPane midPane = new GridPane();
@@ -76,7 +61,8 @@ public class ApplicationRunner extends Application {
     static GridPane librarySearchPane = new GridPane();
     static GridPane songControlPane = new GridPane();
     static GridPane playlistControlPane = new GridPane();
-
+    
+    // All other GUI nodes
     static Label status = new Label();
 
     static Label addSongLabel = new Label("Add New Song");
@@ -388,6 +374,7 @@ public class ApplicationRunner extends Application {
         if (currentSong == null) {
             status.setText("There is no available song to play");
             System.out.println("There is no available song to play");
+            return null;
         } else {
             File file = new File(currentSong.getFileName());
             String source = file.toURI().toString();
@@ -397,5 +384,4 @@ public class ApplicationRunner extends Application {
             return player;
         }
     }
-
 }
